@@ -1,0 +1,388 @@
+--/////////////////////////////////////////////////////////////////////////////
+--                                                                           //
+--Copyright (C) The Internet Society (). All Rights Reserved.
+--
+--This document and translations of it may be copied and furnished to others, 
+--and derivative works that comment on or otherwise explain it or assist in 
+--its implementation may be prepared, copied, published and distributed, in 
+--whole or in part, without restriction of any kind, provided that the above 
+--copyright notice and this paragraph are included on all such copies and 
+--derivative works. However, this document itself may not be modified in any 
+--way, such as by removing the copyright notice or references to the Internet 
+--Society or other Internet organizations, except as needed for the purpose 
+--of developing Internet standards in which case the procedures for copyrights 
+--defined in the Internet Standards process must be followed, or as required 
+--to translate it into languages other than English.
+--
+--The limited permissions granted above are perpetual and will not be revoked 
+--by the Internet Society or its successors or assigns.
+--
+--This document and the information contained herein is provided on 
+--an "AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING TASK 
+--FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
+--TO ANY WARRANTY THAT THE USE OF THE INFORMATION HEREIN WILL NOT INFRINGE ANY 
+--RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A 
+--PARTICULAR PURPOSE.
+--/////////////////////////////////////////////////////////////////////////////
+--
+--  File:               SNMPmsg_Types.asn
+--  Description:        SNMP protocol module type definition file
+--  Rev:                R2A
+--  Prodnr:             CNL 113 774
+--
+
+
+SNMPmsg-Types
+DEFINITIONS ::= BEGIN
+
+IMPORTS;
+-- Needed for SNMP_Oi_Functions
+-- (type set of integer SetOfInteger;)
+
+        SetOfInteger ::= SET OF INTEGER
+
+-- *****************************************
+--
+-- Common SNMP definitions
+--
+-- *****************************************
+
+    internet        OBJECT IDENTIFIER ::= { iso identified-organization(3) dod(6) 1 }
+    directory       OBJECT IDENTIFIER ::= { internet 1 }
+    mgmt            OBJECT IDENTIFIER ::= { internet 2 }
+    experimental    OBJECT IDENTIFIER ::= { internet 3 }
+    private         OBJECT IDENTIFIER ::= { internet 4 }
+    enterprises     OBJECT IDENTIFIER ::= { private 1 }
+    Integer32 ::=   [UNIVERSAL 2]  IMPLICIT INTEGER (-2147483648..2147483647)
+
+    ObjectName ::= OBJECT IDENTIFIER
+
+    IpAddress ::= [APPLICATION 0] IMPLICIT OCTET STRING (SIZE (4))
+
+    TimeTicks ::= [APPLICATION 3] IMPLICIT INTEGER (0..4294967295)
+
+    Opaque ::= [APPLICATION 4] IMPLICIT OCTET STRING   
+
+
+-- *****************************************
+--
+-- SNMPv1 definitions
+--
+-- *****************************************
+
+    SNMPv1-Message ::= SEQUENCE {
+        version   INTEGER { version-1(0) },
+        community OCTET STRING,
+        data      PDUs-v1
+	}
+
+    PDUs-v1 ::= CHOICE {
+        get-request        GetRequest-PDU-v1,
+        get-next-request   GetNextRequest-PDU-v1,
+        get-response       GetResponse-PDU-v1,
+        set-request        SetRequest-PDU-v1,
+        trap               Trap-PDU-v1
+    }
+
+    GetRequest-PDU-v1 ::= [0] IMPLICIT PDU-v1
+
+    GetNextRequest-PDU-v1 ::= [1] IMPLICIT PDU-v1
+
+    GetResponse-PDU-v1 ::= [2] IMPLICIT PDU-v1
+
+    SetRequest-PDU-v1 ::= [3] IMPLICIT PDU-v1
+
+    PDU-v1 ::= SEQUENCE {
+        request-id    INTEGER,
+        error-status  INTEGER {
+            noError(0),
+            tooBig(1),
+            noSuchName(2),
+            badValue(3),
+            readOnly(4),
+            genErr(5)
+        },
+        error-index        INTEGER,
+        variable-bindings  VarBindList-v1
+    }
+
+    Trap-PDU-v1 ::= [4]IMPLICIT SEQUENCE {
+        enterprise      OBJECT IDENTIFIER,
+        agent-addr      NetworkAddress,
+        generic-trap    INTEGER {
+            coldStart(0),
+            warmStart(1),
+            linkDown(2),
+            linkUp(3),
+            authenticationFailure(4),
+            egpNeighborLoss(5),
+            enterpriseSpecific(6)
+        },
+        specific-trap      INTEGER,
+        time-stamp         TimeTicks,
+        variable-bindings  VarBindList-v1
+    }
+
+    VarBind-v1 ::= SEQUENCE {
+        name  ObjectName,
+        val   ObjectSyntax-v1
+    }
+
+    VarBindList-v1 ::= SEQUENCE OF VarBind-v1
+
+    ObjectSyntax-v1 ::= CHOICE {
+        simple           SimpleSyntax-v1,
+        application-wide ApplicationSyntax-v1
+    }
+
+    SimpleSyntax-v1 ::= CHOICE {
+        number  INTEGER,
+        string  OCTET STRING,
+        object  OBJECT IDENTIFIER,
+        empty   NULL
+    }
+
+    ApplicationSyntax-v1 ::= CHOICE {
+        address-field    NetworkAddress,
+        counter    Counter,
+        gauge      Gauge,
+        ticks      TimeTicks,
+        arbitrary  Opaque
+    }
+
+    NetworkAddress ::= CHOICE {
+        internet     IpAddress
+    }
+
+    Counter ::= [APPLICATION 1] IMPLICIT INTEGER (0..4294967295)
+
+    Gauge ::= [APPLICATION 2] IMPLICIT INTEGER (0..4294967295)
+
+-- *****************************************
+--
+-- SNMPv2 definitions
+--
+-- *****************************************
+
+    SNMPv2-Message ::= SEQUENCE {
+        version   INTEGER { version(1) },
+        community OCTET STRING,
+        data      PDUs-v2
+    }
+
+    ObjectSyntax-v2 ::= CHOICE {
+        simple           SimpleSyntax-v2,
+        application-wide ApplicationSyntax-v2
+    }
+
+    SimpleSyntax-v2 ::= CHOICE {
+        integer-value   INTEGER (-2147483648..2147483647),
+        string-value    OCTET STRING (SIZE (0..65535)),
+        objectID-value  OBJECT IDENTIFIER
+    }
+
+    ApplicationSyntax-v2 ::= CHOICE {
+        ipAddress-value        IpAddress,
+        counter-value          Counter32,
+        timeticks-value        TimeTicks,
+        arbitrary-value        Opaque,
+        big-counter-value      Counter64,
+        unsigned-integer-value Unsigned32
+    }
+
+    Counter32 ::= [APPLICATION 1] IMPLICIT INTEGER (0..4294967295)
+
+    Unsigned32 ::= [APPLICATION 2] IMPLICIT INTEGER (0..4294967295)
+
+    Gauge32 ::= Unsigned32
+
+--   Counter64 ::= [APPLICATION 6]
+--                 IMPLICIT INTEGER (0..18446744073709551615)
+-- large numbers like this are not supported in Titan
+
+    Counter64 ::= [APPLICATION 6] IMPLICIT INTEGER (0..4294967295)
+
+   -- protocol data units
+
+    PDUs-v2 ::= CHOICE {
+        get-request      GetRequest-PDU-v2,
+        get-next-request GetNextRequest-PDU-v2,
+        get-bulk-request GetBulkRequest-PDU-v2,
+        response         Response-PDU-v2,
+        set-request      SetRequest-PDU-v2,
+        inform-request   InformRequest-PDU-v2,
+        snmpV2-trap      SNMPv2-Trap-PDU-v2,
+        report           Report-PDU-v2 }
+
+   -- PDUs
+
+    GetRequest-PDU-v2 ::= [0] IMPLICIT PDU-v2
+
+    GetNextRequest-PDU-v2 ::= [1] IMPLICIT PDU-v2
+
+    Response-PDU-v2 ::= [2] IMPLICIT PDU-v2
+
+    SetRequest-PDU-v2 ::= [3] IMPLICIT PDU-v2
+
+   -- [4] is obsolete
+
+    GetBulkRequest-PDU-v2 ::= [5] IMPLICIT BulkPDU-v2
+
+    InformRequest-PDU-v2 ::= [6] IMPLICIT PDU-v2
+
+    SNMPv2-Trap-PDU-v2 ::= [7] IMPLICIT PDU-v2
+
+   --   Usage and precise semantics of Report-PDU are not defined
+   --   in this document.  Any SNMP administrative framework making
+   --   use of this PDU must define its usage and semantics.
+
+    Report-PDU-v2 ::= [8] IMPLICIT PDU-v2
+
+    max-bindings INTEGER ::= 2147483647
+
+    PDU-v2 ::= SEQUENCE {
+        request-id   INTEGER (-214783648..214783647),
+        error-status INTEGER {  -- sometimes ignored
+                noError(0),
+                tooBig(1),
+                noSuchName(2),      -- for proxy compatibility
+                badValue(3),        -- for proxy compatibility
+                readOnly(4),        -- for proxy compatibility
+                genErr(5),
+                noAccess(6),
+                wrongType(7),
+                wrongLength(8),
+                wrongEncoding(9),
+                wrongValue(10),
+                noCreation(11),
+                inconsistentValue(12),
+                resourceUnavailable(13),
+                commitFailed(14),
+                undoFailed(15),
+                authorizationError(16),
+                notWritable(17),
+                inconsistentName(18)
+        },
+        error-index       INTEGER (0..max-bindings), -- sometimes ignored
+        variable-bindings VarBindList-v2 -- values are sometimes ignored
+    }
+
+    BulkPDU-v2 ::= SEQUENCE {  -- must be identical in structure to PDU
+        request-id        INTEGER (-214783648..214783647),
+        non-repeaters     INTEGER (0..max-bindings),
+        max-repetitions   INTEGER (0..max-bindings),
+        variable-bindings VarBindList-v2  -- values are ignored
+    }
+
+   -- variable binding
+
+    VarBind-v2 ::= SEQUENCE {
+        name ObjectName,
+        varbindchoice CHOICE {
+--            value          ObjectSyntax,
+-- value is a keyword in TTCN-3
+            valueField     ObjectSyntax-v2,
+            unSpecified    NULL, -- in retrieval requests
+                                 -- exceptions in responses
+            noSuchObject   [0] IMPLICIT NULL,
+            noSuchInstance [1] IMPLICIT NULL,
+            endOfMibView   [2] IMPLICIT NULL
+        }
+    }
+
+   -- variable-binding list
+
+    VarBindList-v2 ::= SEQUENCE (SIZE (0..max-bindings)) OF VarBind-v2
+
+-- *****************************************
+--
+-- SNMPv3 definitions
+--
+-- *****************************************
+
+--***************************************************************************
+--Based on RFC 3412 and RFC 3414(USM)
+--ethlel,2003.11.20
+--
+--
+--***************************************************************************
+ 
+--Internal
+
+       SNMPv3Message ::= SEQUENCE {
+           -- identify the layout of the SNMPv3Message
+           -- this element is in same position as in SNMPv1
+           -- and SNMPv2c, allowing recognition
+           -- the value 3 is used for snmpv3
+           msgVersion INTEGER ( 0 .. 2147483647 ),
+           -- administrative parameters
+           msgGlobalData HeaderData,
+           -- security model-specific parameters
+           -- format defined by Security Model
+           msgSecurityParameters UsmSecurityParameters,
+           msgData  ScopedPduData
+       }
+
+
+--External
+
+       SNMPv3-Message ::= SEQUENCE {
+           -- identify the layout of the SNMPv3Message
+           -- this element is in same position as in SNMPv1
+           -- and SNMPv2c, allowing recognition
+           -- the value 3 is used for snmpv3
+           msgVersion INTEGER ( 0 .. 2147483647 ),
+           -- administrative parameters
+           msgGlobalData HeaderData,
+           -- security model-specific parameters
+           -- format defined by Security Model
+           msgSecurityParameters OCTET STRING,
+           msgData  ScopedPduData
+       }
+
+
+       HeaderData ::= SEQUENCE {
+           msgID      INTEGER (0..2147483647),
+           msgMaxSize INTEGER (484..2147483647),
+
+           msgFlags   OCTET STRING (SIZE(1)),
+                      --  .... ...1   authFlag
+                      --  .... ..1.   privFlag
+                      --  .... .1..   reportableFlag
+                      --              Please observe:
+                      --  .... ..00   is OK, means noAuthNoPriv
+                      --  .... ..01   is OK, means authNoPriv
+                      --  .... ..10   reserved, must NOT be used.
+                      --  .... ..11   is OK, means authPriv
+
+           msgSecurityModel INTEGER (1..2147483647)
+       }
+
+       ScopedPduData ::= CHOICE {
+           plaintext    ScopedPDU,
+           encryptedPDU OCTET STRING  -- encrypted scopedPDU value
+       }
+
+       ScopedPDU ::= SEQUENCE {
+           contextEngineID  OCTET STRING,
+           contextName      OCTET STRING,
+           data             PDUs-v2
+       }
+
+
+
+
+      UsmSecurityParameters ::=
+          SEQUENCE {
+           -- global User-based security parameters
+              msgAuthoritativeEngineID     OCTET STRING,
+              msgAuthoritativeEngineBoots  INTEGER (0..2147483647),
+              msgAuthoritativeEngineTime   INTEGER (0..2147483647),
+              msgUserName                  OCTET STRING (SIZE(0..32)),
+           -- authentication protocol specific parameters
+              msgAuthenticationParameters  OCTET STRING,
+           -- privacy protocol specific parameters
+              msgPrivacyParameters         OCTET STRING
+          }
+
+END

@@ -1,0 +1,82 @@
+/******************************************************************************
+* Copyright (c) 2013, 2014  Ericsson AB
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the Eclipse Public License v1.0
+* which accompanies this distribution, and is available at
+* http://www.eclipse.org/legal/epl-v10.html
+*
+* Contributors:
+*   Endre Kulcsar - initial implementation and initial documentation
+******************************************************************************/
+//
+//  File:               SNMP_Functions.ttcn
+//  Description:        SNMP enc/dec, encryption and oi functions
+//  Rev:                R2A
+//  Prodnr:             CNL 113 774
+
+module SNMP_Functions {
+
+	import from SNMPmsg_Types language "ASN.1:1997" all;
+
+//SNMP encoder/decoder functions        
+
+       external function enc_SNMPv1_Message(in SNMPv1_Message pdu) return octetstring
+         with { extension "prototype(convert) encode(BER:BER_ENCODE_DER)" };
+       external function dec_SNMPv1_Message(in octetstring stream) return SNMPv1_Message 
+         with { extension "prototype(convert) decode(BER:BER_ACCEPT_ALL)" };
+       external function dec_SNMPv1_Message_backtrack(in octetstring stream, out SNMPv1_Message pdu) return integer
+         with { extension "prototype(backtrack) decode(BER:BER_ACCEPT_ALL)" };	 
+	 
+       external function enc_SNMPv2_Message(in SNMPv2_Message pdu) return octetstring
+         with { extension "prototype(convert) encode(BER:BER_ENCODE_DER)" };
+       external function dec_SNMPv2_Message(in octetstring stream) return SNMPv2_Message 
+         with { extension "prototype(convert) decode(BER:BER_ACCEPT_ALL)" };
+       external function dec_SNMPv2_Message_backtrack(in octetstring stream, out SNMPv2_Message pdu) return integer
+         with { extension "prototype(backtrack) decode(BER:BER_ACCEPT_ALL)" };	 	 
+	 
+       external function enc_SNMPv3_Message(in SNMPv3_Message pdu) return octetstring
+         with { extension "prototype(convert) encode(BER:BER_ENCODE_DER)" };
+       external function dec_SNMPv3_Message(in octetstring stream) return SNMPv3_Message 
+         with { extension "prototype(convert) decode(BER:BER_ACCEPT_ALL)" };
+       external function dec_SNMPv3_Message_backtrack(in octetstring stream, out SNMPv3_Message pdu) return integer
+         with { extension "prototype(backtrack) decode(BER:BER_ACCEPT_ALL)" };	 		 
+	 
+//SNMP_Oi_Functions
+	//concatenates
+	external function oi_concat(in objid first, in objid second) return objid;
+	//returns number of elements
+	external function oi_size(in objid input) return integer;
+	//checks equality
+	external function oi_eq(in objid a, in objid b) return boolean;
+	//returns sub-objid
+	external function oi_sub(in integer begin, in integer size, in objid input)
+	 		 return objid;
+	// returns true if a > b (lexicographically) else false 
+	external function oi_gt(in objid a, in objid b) return boolean; 
+	// concatenates
+	external function oi_addObjId(in objid first, in SetOfInteger second) 
+			 return objid;
+        // insert an element to the objid in position
+	external function oi_setvalue(in objid input, in integer position, in integer val) return objid;
+	// returns a selected element of objid
+	external function oi_getvalue(in objid input, in integer position) return integer;
+
+//SNMP_USM_Functions
+	// declaration of external functions for authentication & encryption
+
+	external function calculate_MD5_MAC(in octetstring authKey, 
+		in SNMPv3_Message wholeMsg) return octetstring;
+
+	external function encryptData (in octetstring encryptKey, in ScopedPDU dataToEncrypt,
+		out octetstring encryptedData, in octetstring privParameters);
+
+	external function decryptData(in octetstring decryptKey, in octetstring privParameters,
+		in octetstring encryptedData, out ScopedPDU decryptedData);
+
+	external function password_to_key_md5(in octetstring password, in octetstring engineID,
+		out octetstring key);
+
+	external function enc_UsmSecurityParameters(in UsmSecurityParameters input) return octetstring;
+	external function dec_UsmSecurityParameters(in octetstring input) return UsmSecurityParameters;
+
+}

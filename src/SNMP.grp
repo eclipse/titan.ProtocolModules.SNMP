@@ -1,0 +1,25 @@
+<!--
+/******************************************************************************
+* Copyright (c) 2013, 2014  Ericsson AB
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the Eclipse Public License v1.0
+* which accompanies this distribution, and is available at
+* http://www.eclipse.org/legal/epl-v10.html
+*
+* Contributors:
+*   Endre Kulcsar - initial implementation and initial documentation
+******************************************************************************/
+//
+//  File:         SNMP.grp
+//  Description:  Group file for SNMP protocol module
+//  Rev:          R2A
+//  Prodnr:       CNL 113 774
+///////////////////////////////////////////////////////////////////////////////
+-->
+<!DOCTYPE TITAN_GUI_FileGroup_file>
+    <File_Group name="SNMP" >
+        <File path="SNMP_Functions.ttcn" />
+        <File path="SNMP_Oi.cc" />
+        <File path="SNMP_USM.cc" />
+        <File path="SNMPmsg_Types.asn" />		
+    </File_Group>
