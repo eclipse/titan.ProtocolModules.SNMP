@@ -11,7 +11,7 @@
 //
 //  File:               SNMP_USM.cc
 //  Description:        SNMP protocol module external functions for encryption
-//  Rev:                R2A
+//  Rev:                R2B
 //  Prodnr:             CNL 113 774
 //
 

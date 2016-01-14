@@ -11,7 +11,7 @@
 //
 //  File:               SNMP_Functions.ttcn
 //  Description:        SNMP enc/dec, encryption and oi functions
-//  Rev:                R2A
+//  Rev:                R2B
 //  Prodnr:             CNL 113 774
 
 module SNMP_Functions {

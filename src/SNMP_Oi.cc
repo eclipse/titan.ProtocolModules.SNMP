@@ -11,7 +11,7 @@
 //
 //  File:               SNMPmsg_Oi.cc
 //  Description:        SNMP protocol module external functions for OBJIDs
-//  Rev:                R2A
+//  Rev:                R2B
 //  Prodnr:             CNL 113 774
 //
 
